@@ -369,48 +369,108 @@ This guide was tested on Fedora 41 KDE but should work on other Linux distributi
 
 ### 11. Spoof QEMU (Mandatory)
 
-Based on Scrut1ny/Hypervisor-Phantom.
+- This script is based on: [Scrut1ny/Hypervisor-Phantom](https://github.com/Scrut1ny/Hypervisor-Phantom)
 
-1. Install dependencies:
-   - **Fedora**: `sudo dnf builddep qemu`
-   - **Debian**: `sudo apt build-dep qemu`
-2. Run `qemupatch.sh` to clone, patch, and build `qemu-system-x86_64`.
-3. Update VM XML:
-   - Replace from `<pm>` to `</emulator>` with:
 
-     ```shell
-     <pm>
-       <suspend-to-mem enabled="yes"/>
-       <suspend-to-disk enabled="no"/>
-     </pm>
-     <devices>
-       <emulator>/usr/local/bin/qemu-system-x86_64</emulator>
-     ```
-4. Ignore the `acpitable` section unless required.
+  <details>
+    <summary>Build on <b>Fedora Linux</b>:</summary>
+
+  ```shell
+  sudo dnf builddep qemu
+  ```
+  </details>
+
+
+  <details>
+    <summary>Build on <b>Debian Linux</b>:</summary>
+
+  ```shell
+  sudo apt build-dep qemu
+  ```
+  </details>
+
+- Run `qemupatch.sh` to clone, patch, and build `qemu-system-x86_64` with generated data.
+  - You can edit `default_models` with real data.
+
+- Virtual Machine Manager >> [Open] >> View >> Details >> Overview >> XML
+
+
+- Replace from `<pm>` to `</emulator>` and [Apply]:
+  <details>
+    <summary>Spoiler</summary>
+
+  ```shell
+  <pm>
+    <suspend-to-mem enabled="yes"/>
+    <suspend-to-disk enabled="no"/>
+  </pm>
+  <devices>
+    <emulator>/usr/local/bin/qemu-system-x86_64</emulator>
+  ```
+  </details>
+
+
+- Replace `</qemu:commandline>` and [Apply]:
+  <details>
+    <summary>Spoiler <b>(not required, ignore this)</b></summary>
+
+  ```shell
+    <qemu:arg value="-acpitable"/>
+    <qemu:arg value="file=/usr/local/bin/ssdt1.aml"/>
+    <qemu:arg value="-acpitable"/>
+    <qemu:arg value="file=/usr/local/bin/ssdt2.aml"/>
+  </qemu:commandline>
+  ```
+  </details>
 
 ### 12. Spoof OVMF (Mandatory)
 
-1. Install dependencies:
-   - **Fedora**: `sudo dnf install acpica-tools nasm`
-   - **Debian**: `sudo apt install acpica-tools nasm`
-2. Run `edk2patch.sh` to clone, patch, and build OVMF.
-3. Update VM XML:
-   - Replace from `<os firmware="efi">` to `</os>` with:
+- This script is based on: [Scrut1ny/Hypervisor-Phantom](https://github.com/Scrut1ny/Hypervisor-Phantom)
 
-     ```shell
-     <os>
-       <type arch="x86_64" machine="pc-q35-9.2">hvm</type>
-       <loader readonly="yes" secure="yes" type="pflash" format="raw">/usr/share/edk2/ovmf/OVMF_CODE_4M.patched.fd</loader>
-       <nvram format="raw">/usr/share/edk2/ovmf/OVMF_VARS_4M.patched.fd</nvram>
-       <bootmenu enable="yes"/>
-     </os>
-     ```
+
+  <details>
+    <summary>Build on <b>Fedora Linux</b>:</summary>
+
+  ```shell
+  sudo dnf install acpica-tools
+  sudo dnf install nasm
+  ```
+  </details>
+
+
+  <details>
+    <summary>Build on <b>Debian Linux</b>:</summary>
+
+  ```shell
+  sudo apt install acpica-tools
+  sudo apt install nasm
+  ```
+  </details>
+
+- Run `edk2patch.sh` to clone, patch, and build `OVMF` with generated data.
+
+- Virtual Machine Manager >> [Open] >> View >> Details >> Overview >> XML
+
+
+- Replace from `<os firmware="efi">` to `</os>` and [Apply]:
+  <details>
+    <summary>Spoiler</summary>
+
+  ```shell
+  <os>
+    <type arch="x86_64" machine="pc-q35-9.2">hvm</type>
+    <loader readonly="yes" secure="yes" type="pflash" format="raw">/usr/share/edk2/ovmf/OVMF_CODE_4M.patched.fd</loader>
+    <nvram format="raw">/usr/share/edk2/ovmf/OVMF_VARS_4M.patched.fd</nvram>
+    <bootmenu enable="yes"/>
+  </os>
+  ```
+  </details>
 
 ### 13. Configure Nika
 
 1. Edit `Nika.ini` and set `START_OVERLAY = NO`.
 
-### 14. No Longer Required: Memflow-KVM Setup
+### 14. No Longer Required: Memflow-KVM Setup (Ignore this step)
 
 1. Install DKMS:
    - **Fedora**:
@@ -438,10 +498,8 @@ Based on Scrut1ny/Hypervisor-Phantom.
    cd path/to/extracted/repository
    sudo -E ./nika
    ```
-4. If KVM is not detected, add `ibt=off` (or `no_cet`) to GRUB: `sudo vi /etc/default/grub`, then `sudo grub2-mkconfig -o /etc/grub2.cfg`.
 
 ## Troubleshooting
 
-- Ensure all commands are run with the correct permissions (`sudo` where required).
-- Verify file paths and device IDs for your hardware.
-- If issues persist, consult the original guide or community resources for distro-specific fixes.
+- If KVM is not detected, add `ibt=off` (or `no_cet`) to GRUB: `sudo vi /etc/default/grub`, then `sudo grub2-mkconfig -o /etc/grub2.cfg`.
+
