@@ -151,117 +151,205 @@ This guide was tested on Fedora 41 KDE but should work on other Linux distributi
 1. In **Virtual Machine Manager** &gt; Overview &gt; XML, make the following replacements:
    - Replace `<domain type="kvm">` with (use your own SMBIOS data from `sudo dmidecode`):
 
-     ```shell
-     <domain type="kvm" xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0">
-       <qemu:commandline>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=0,vendor=ASUS,version=X.23,date=06/14/2024,release=12.34"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=1,manufacturer=ASUS,product=ASUS Zenbook 14X UM5401,version=23.41,serial=D3E4F56789"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=2,manufacturer=ASUS,product=87FD,version=34.12,serial=B1C2D3E4F56789"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=3,manufacturer=ASUS,version=23.41,serial=D3E4F56789"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=4,manufacturer=Advanced Micro Devices,, Inc.,version=AMD Ryzen 9 6900HX with Radeon Graphics"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=8,internal_reference=J1A1,external_reference=Keyboard,connector_type=0x0F,port_type=0x0D"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=8,internal_reference=J1A1,external_reference=Mouse,connector_type=0x0F,port_type=0x0E"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=9,slot_designation=J6C1,slot_type=0xAA,slot_data_bus_width=0x0D,current_usage=0x04,slot_length=0x04,slot_id=0x01,slot_characteristics1=0x04,slot_characteristics2=0x03"/>
-         <qemu:arg value="-smbios"/>
-         <qemu:arg value="type=17,manufacturer=Samsung,speed=4800,serial=E4F50000"/>
-       </qemu:commandline>
-     ```
-   - Replace `</metadata>` with:
+  ```shell
+  <domain type="kvm" xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0">
+    <qemu:commandline>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=0,vendor=ASUS,version=X.23,date=06/14/2024,release=12.34"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=1,manufacturer=ASUS,product=ASUS Zenbook 14X UM5401,version=23.41,serial=D3E4F56789"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=2,manufacturer=ASUS,product=87FD,version=34.12,serial=B1C2D3E4F56789"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=3,manufacturer=ASUS,version=23.41,serial=D3E4F56789"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=4,sock_pfx=XPTO,manufacturer=Advanced Micro Devices,, Inc.,version=AMD Ryzen 9 6900HX with Radeon Graphics"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=8,internal_reference=J1A1,external_reference=Keyboard,connector_type=0x0F,port_type=0x0D"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=8,internal_reference=J1A1,external_reference=Mouse,connector_type=0x0F,port_type=0x0E"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=9,slot_designation=J6C1,slot_type=0xAA,slot_data_bus_width=0x0D,current_usage=0x04,slot_length=0x04,slot_id=0x01,slot_characteristics1=0x04,slot_characteristics2=0x03"/>
+      <qemu:arg value="-smbios"/>
+      <qemu:arg value="type=17,manufacturer=Samsung,part=M425R1GB4BB0-CQK,speed=4800,serial=E4F50000"/>
+    </qemu:commandline>
+  ```
+  </details>
 
-     ```shell
-     <vmware xmlns="http://www.vmware.com/schema/vmware.config">
-       <config>
-         <entry name="hypervisor.cpuid.v0" value="FALSE"/>
-       </config>
-     </vmware>
-     </metadata>
-     ```
-   - Replace from `<memory unit="KiB">4194304</memory>` to `<vcpu placement="static">2</vcpu>` with (use 8, 16, or 24 GiB; adjust vCPUs based on host CPU):
 
-     ```shell
-     <memory unit="GiB">24</memory>
-     <currentMemory unit="GiB">24</currentMemory>
-     <vcpu placement="static">24</vcpu>
-     ```
-   - Replace from `<features>` to `</clock>` with (for Intel 4c/4t CPU):
+- Replace `</metadata>` and [Apply]:
+  <details>
+    <summary>Spoiler</summary>
 
-     ```shell
-     <features>
-       <acpi/>
-       <apic/>
-       <hyperv mode="custom">
-         <relaxed state="off"/>
-         <vapic state="off"/>
-         <spinlocks state="off"/>
-         <vpindex state="off"/>
-         <runtime state="off"/>
-         <synic state="off"/>
-         <stimer state="off"/>
-         <reset state="off"/>
-         <vendor_id state="on" value="GenuineIntel"/>
-         <frequencies state="off"/>
-         <reenlightenment state="off"/>
-         <tlbflush state="off"/>
-         <ipi state="off"/>
-         <evmcs state="off"/>
-         <avic state="off"/>
-       </hyperv>
-       <kvm>
-         <hidden state="on"/>
-       </kvm>
-       <pmu state="on"/>
-       <vmport state="off"/>
-       <smm state="on"/>
-       <ioapic driver="kvm"/>
-       <msrs unknown="fault"/>
-     </features>
-     <cpu mode="host-passthrough" check="none" migratable="off">
-       <topology sockets="1" cores="4" threads="1"/>
-       <cache mode="passthrough"/>
-       <feature policy="require" name="aes"/>
-       <feature policy="disable" name="hypervisor"/>
-       <feature policy="disable" name="svm"/>
-       <feature policy="require" name="vmx"/>
-       <feature policy="disable" name="x2apic"/>
-       <feature policy="disable" name="topoext"/>
-       <feature policy="require" name="invtsc"/>
-       <feature policy="disable" name="amd-ssbd"/>
-       <feature policy="disable" name="ssbd"/>
-       <feature policy="disable" name="virt-ssbd"/>
-       <feature policy="disable" name="rdpid"/>
-       <feature policy="disable" name="rdtscp"/>
-     </cpu>
-     <clock offset="localtime">
-       <timer name="tsc" present="yes" tickpolicy="discard" mode="native"/>
-       <timer name="hpet" present="yes"/>
-       <timer name="rtc" present="no"/>
-       <timer name="pit" present="no"/>
-       <timer name="kvmclock" present="no"/>
-       <timer name="hypervclock" present="no"/>
-     </clock>
-     ```
-   - Replace `<memballoon model="virtio">` to `</memballoon>` with:
+  ```shell
+    <vmware xmlns="http://www.vmware.com/schema/vmware.config">
+      <config>
+        <entry name="hypervisor.cpuid.v0" value="FALSE"/>
+      </config>
+    </vmware>
+  </metadata>
+  ```
+  </details>
 
-     ```shell
-     <memballoon model="none"/>
-     ```
-   - Replace `<audio id="1" type="spice"/>` with (optional for PipeWire audio):
 
-     ```shell
-     <audio id="1" type="pipewire" runtimeDir="/run/user/1000">
-       <input name="qemuinput"/>
-       <output name="qemuoutput"/>
-     </audio>
-     ```
-2. Remove **Tablet** device from VM settings.
+- Replace from `<memory unit="KiB">4194304</memory>` to `<vcpu placement="static">2</vcpu>` and [Apply]:
+  <details>
+    <summary>Spoiler <b>(use a commercial memory size like 8, 16, or 24 GiB; vcpu example for a 24 threads host CPU)</b></summary>
+
+  ```shell
+  <memory unit="GiB">24</memory>
+  <currentMemory unit="GiB">24</currentMemory>
+  <vcpu placement="static">24</vcpu>
+  ```
+  </details>
+
+
+- Replace from `<features>` to `</clock>` and [Apply]:
+  <details>
+    <summary>Spoiler (example for <b>AMD</b> 12 cores 24 threads host CPU)</summary>
+
+  ```shell
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv mode="custom">
+      <relaxed state="off"/>
+      <vapic state="off"/>
+      <spinlocks state="off"/>
+      <vpindex state="off"/>
+      <runtime state="off"/>
+      <synic state="off"/>
+      <stimer state="off"/>
+      <reset state="off"/>
+      <vendor_id state="on" value="AuthenticAMD"/>
+      <frequencies state="off"/>
+      <reenlightenment state="off"/>
+      <tlbflush state="off"/>
+      <ipi state="off"/>
+      <evmcs state="off"/>
+      <avic state="off"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+    <pmu state="on"/>
+    <vmport state="off"/>
+    <smm state="on"/>
+    <ioapic driver="kvm"/>
+    <msrs unknown="fault"/>
+  </features>
+  <cpu mode="host-passthrough" check="none" migratable="off">
+    <topology sockets="1" cores="12" threads="2"/>
+    <cache mode="passthrough"/>
+    <feature policy="disable" name="aes"/>
+    <feature policy="disable" name="hypervisor"/>
+    <feature policy="require" name="svm"/>
+    <feature policy="disable" name="vmx"/>
+    <feature policy="disable" name="x2apic"/>
+    <feature policy="require" name="topoext"/>
+    <feature policy="require" name="invtsc"/>
+    <feature policy="disable" name="amd-ssbd"/>
+    <feature policy="disable" name="ssbd"/>
+    <feature policy="disable" name="virt-ssbd"/>
+    <feature policy="disable" name="rdpid"/>
+    <feature policy="disable" name="rdtscp"/>
+  </cpu>
+  <clock offset="localtime">
+    <timer name="tsc" present="yes" tickpolicy="discard" mode="native"/>
+    <timer name="hpet" present="yes"/>
+    <timer name="rtc" present="no"/>
+    <timer name="pit" present="no"/>
+    <timer name="kvmclock" present="no"/>
+    <timer name="hypervclock" present="no"/>
+  </clock>
+  ```
+  </details>
+
+
+  <details>
+    <summary>Spoiler (example for <b>Intel</b> 4 cores 4 threads host CPU)</summary>
+
+  ```shell
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv mode="custom">
+      <relaxed state="off"/>
+      <vapic state="off"/>
+      <spinlocks state="off"/>
+      <vpindex state="off"/>
+      <runtime state="off"/>
+      <synic state="off"/>
+      <stimer state="off"/>
+      <reset state="off"/>
+      <vendor_id state="on" value="GenuineIntel"/>
+      <frequencies state="off"/>
+      <reenlightenment state="off"/>
+      <tlbflush state="off"/>
+      <ipi state="off"/>
+      <evmcs state="off"/>
+      <avic state="off"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+    <pmu state="on"/>
+    <vmport state="off"/>
+    <smm state="on"/>
+    <ioapic driver="kvm"/>
+    <msrs unknown="fault"/>
+  </features>
+  <cpu mode="host-passthrough" check="none" migratable="off">
+    <topology sockets="1" cores="4" threads="1"/>
+    <cache mode="passthrough"/>
+    <feature policy="require" name="aes"/>
+    <feature policy="disable" name="hypervisor"/>
+    <feature policy="disable" name="svm"/>
+    <feature policy="require" name="vmx"/>
+    <feature policy="disable" name="x2apic"/>
+    <feature policy="disable" name="topoext"/>
+    <feature policy="require" name="invtsc"/>
+    <feature policy="disable" name="amd-ssbd"/>
+    <feature policy="disable" name="ssbd"/>
+    <feature policy="disable" name="virt-ssbd"/>
+    <feature policy="disable" name="rdpid"/>
+    <feature policy="disable" name="rdtscp"/>
+  </cpu>
+  <clock offset="localtime">
+    <timer name="tsc" present="yes" tickpolicy="discard" mode="native"/>
+    <timer name="hpet" present="yes"/>
+    <timer name="rtc" present="no"/>
+    <timer name="pit" present="no"/>
+    <timer name="kvmclock" present="no"/>
+    <timer name="hypervclock" present="no"/>
+  </clock>
+  ```
+  </details>
+
+
+- Replace from `<memballoon model="virtio">` to `</memballoon>` and [Apply]:
+  <details>
+    <summary>Spoiler</summary>
+
+  ```shell
+  <memballoon model="none"/>
+  ```
+  </details>
+
+
+- Replace `<audio id="1" type="spice"/>` and [Apply]:
+  <details>
+    <summary>Spoiler <b>(for pipewire sound, not required)</b></summary>
+
+  ```shell
+  <audio id="1" type="pipewire" runtimeDir="/run/user/1000">
+    <input name="qemuinput"/>
+    <output name="qemuoutput"/>
+  </audio>
+  ```
+  </details>
+
+- Virtual Machine Manager >> [Open] >> View >> Details >> Tablet >> [Remove]
 
 ### 6. Configure Windows VM Boot
 
